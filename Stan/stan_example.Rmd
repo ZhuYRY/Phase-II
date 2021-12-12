@@ -1,0 +1,112 @@
+---
+title: "stan examples"
+author: "Yanruyu Zhu (yaz4004)"
+date: "12/8/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(digits=6)
+```
+
+This file contains examples of 'Stan'.         
+The first example is for Gaussian model.      
+The second example is for Beta-binomial model.
+
+ 
+```{r message=FALSE, include=FALSE}
+#remove.packages("rstan")
+#if (file.exists(".RData")) file.remove(".RData")
+#install.packages('rstan')
+```
+
+## Set up
+
+```{r message=FALSE}
+library('rstan')
+options(mc.cores = parallel::detectCores())
+rstan_options(auto_write = TRUE)
+seed = 2021
+```
+
+## Ex_1 Gaussian    
+
+The mock data is 1,000 i.i.d. X ~ Normal($\mu$=5,$\sigma$=1).      
+
+```{r message=FALSE}
+X = rnorm(n=1000, mean=5, sd=1) # fake data
+mydata = list(N=1000, X=X)      # stan takes data format as 'List'
+fit = stan(file='my_model_norm.stan', data=mydata, seed = seed)
+#print(fit)
+```
+
+### Template Result:     
+
+```{r}
+print(fit)
+```
+### Pair plots:      
+
+```{r fig.cap="Pair plots for Gaussian model"}
+pairs(fit)
+```
+
+### Try to extract sample results
+
+```{r}
+param = extract(fit)
+param$mu[1:10]
+```
+
+```{r, include=FALSE}
+# could re-load after clear workspace 
+save(fit, file='my_fit')
+```
+
+```{r, include=FALSE}
+# reload previously saved my_fit
+load('my_fit')
+print(fit)
+```
+
+## Ex_2 Beta-binomial        
+
+### Parameters and set up:       
+
+The number of sampling times is 1000;      
+Prior distribution $\theta$~$Beta(1,1)$, Y~$Bin(100,\theta)$;         
+Observed data is 82 responses in the first cohort of 100 patients;        
+
+```{r message=FALSE}
+iter = 1000
+data_bin <- list(N = 100, y = 82)
+
+fit_bin <- stan(file = 'beta_binom.stan', data = data_bin, iter = iter, seed = seed)
+```
+
+### Posterior distribution for $\theta$:       
+
+```{r}
+monitor(fit_bin)
+draws <- as.data.frame(fit_bin)
+hist(draws[,'theta'])
+```
+
+### For $P(\theta \leq 0.92 | Y=82)$ 
+
+```{r}
+sum(draws$theta<=0.92)/nrow(draws)
+```
+
+As $P(\theta \leq 0.92 | Y=82) = 0.9985 >0.9$, we stop the trial at the first interim analysis for observing 82 responses in the first 100 patients.
+
+
+
+
+
+
+
+
+
+
