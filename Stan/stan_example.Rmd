@@ -6,7 +6,7 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 options(digits=6)
 ```
 
@@ -80,16 +80,16 @@ Observed data is 82 responses in the first cohort of 100 patients;
 
 ```{r message=FALSE}
 iter = 1000
-data_bin <- list(N = 100, y = 82)
+data_bin_low <- list(N = 100, y = 82)
 
-fit_bin <- stan(file = 'beta_binom.stan', data = data_bin, iter = iter, seed = seed)
+fit_bin_low <- stan(file = 'beta_binom.stan', data = data_bin_low, iter = iter, seed = seed)
 ```
 
 ### Posterior distribution for $\theta$:       
 
 ```{r}
-monitor(fit_bin)
-draws <- as.data.frame(fit_bin)
+monitor(fit_bin_low)
+draws <- as.data.frame(fit_bin_low)
 hist(draws[,'theta'])
 ```
 
@@ -102,11 +102,48 @@ sum(draws$theta<=0.92)/nrow(draws)
 As $P(\theta \leq 0.92 | Y=82) = 0.9985 >0.9$, we stop the trial at the first interim analysis for observing 82 responses in the first 100 patients.
 
 
+```{r}
+#iter = 1000
+data_bin_h <- list(N = 100, y = 95)
+
+fit_bin_h <- stan(file = 'beta_binom.stan', data = data_bin_h, iter = iter, seed = seed)
+```
+
+```{r}
+draws_h <- as.data.frame(fit_bin_h)
+sum(draws_h$theta<=0.92)/nrow(draws_h)
+```
+
+### Iteration from Y = 82 to Y = 95       
+
+```{r}
+#, include=FALSE}
+p = rep(0, 95-81)
+for (i in 82:95) {
+  #a = i+1
+  data_bin = list(N = 100, y = i)
+  fit_bin = stan(file = 'beta_binom.stan', data = data_bin, iter = iter, seed = seed)
+  draws = as.data.frame(fit_bin)
+  p[i-81] = sum(draws$theta<=0.92)/nrow(draws)
+}
+```
+
+```{r}
+plot(82:95, p, type="o", pch="o", lty=1, col="black",
+     xlab = "Number of Success (Y)",
+     ylab = "Probability", 
+     main = "Posterior distribution of theta")
+axis(side = 1, at = seq(82, 95, by=1))#, las=2)
+abline(h = 0.92, col="red")
+legend(x = "topright", legend=c("0.92"),
+       col=c("red"), lty=1, lwd=2, cex=0.75)
+```
 
 
-
-
-
+```{r}
+paste("P|Y=88:", p[88-81])
+paste("P|Y=89:", p[89-81])
+```
 
 
 
