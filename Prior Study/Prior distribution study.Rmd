@@ -1,0 +1,230 @@
+---
+title: "Prior distribution study"
+author: "Yanruyu Zhu (yaz4004)"
+date: "1/09/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+options(digits=6)
+```
+
+```{r message=FALSE, include=FALSE}
+#remove.packages("rstan")
+#if (file.exists(".RData")) file.remove(".RData")
+#install.packages('rstan')
+```
+
+## Set up               
+Seed = 2021
+The number of sampling times is 1000;
+
+```{r message=FALSE}
+library('rstan')
+options(mc.cores = parallel::detectCores())
+rstan_options(auto_write = TRUE)
+seed = 2021
+iter = 1000
+```
+
+## Parameters      
+      
+Prior distribution $\theta$~$Beta(\alpha,\beta)$, Y~$Bin(100,\theta)$;         
+Observed data is 82 responses in the first cohort of 100 patients;       
+
+### Scenario 1:                   
+- $\alpha = 1, \beta = 1$            
+
+**Mean and Variance of Beta(1,1)**        
+```{r}
+a = 1
+b = 1
+mean = a/(a+b)
+var = (a*b)/((a+b)^2*(a+b+1))
+paste("mean = ",mean)
+paste("variance = ", var)
+```
+
+```{r message=FALSE}
+p = rep(0, 95-81)
+
+for (i in 82:95) {
+  #a = i+1
+  data_bin = list(N = 100, y = i)
+  fit_bin = stan(file = 'beta_binom_1_1.stan', data = data_bin, iter = iter, seed = seed)
+  draws = as.data.frame(fit_bin)
+  p[i-81] = sum(draws$theta<=0.92)/nrow(draws)
+}
+```
+
+**Posterior plot for number of success from 82 to 95**          
+
+```{r}
+plot(82:95, p, type="o", pch="o", lty=1, col="black",
+     xlab = "Number of Success (Y)",
+     ylab = "Probability", 
+     main = "Posterior distribution of theta",
+     sub = "a=1, b=1")
+axis(side = 1, at = seq(82, 95, by=1))#, las=2)
+abline(h = 0.92, col="red")
+legend(x = "topright", legend=c("0.92"),
+       col=c("red"), lty=1, lwd=2, cex=0.75)
+```
+
+**Threshhold value**         
+
+```{r}
+paste("P|Y=88:", p[88-81])
+paste("P|Y=89:", p[89-81])
+```
+
+### Scenario 2:                   
+- $\alpha = 0.09, \beta = 0.01$            
+
+**Mean and Variance of Beta(0.09,0.01)**        
+```{r}
+a = 0.09
+b = 0.01
+mean = a/(a+b)
+var = (a*b)/((a+b)^2*(a+b+1))
+paste("mean = ",mean)
+paste("variance = ", var)
+```
+
+Mean is 0.9, and variance is roughly the same as Beta(1,1)
+
+```{r message=FALSE}
+p = rep(0, 95-81)
+
+for (i in 82:95) {
+  #a = i+1
+  data_bin = list(N = 100, y = i)
+  fit_bin = stan(file = 'beta_binom_0.09_0.01.stan', data = data_bin, iter = iter, seed = seed)
+  draws = as.data.frame(fit_bin)
+  p[i-81] = sum(draws$theta<=0.92)/nrow(draws)
+}
+```
+
+**Posterior plot for number of success from 82 to 95**          
+
+```{r}
+plot(82:95, p, type="o", pch="o", lty=1, col="black",
+     xlab = "Number of Success (Y)",
+     ylab = "Probability", 
+     main = "Posterior distribution of theta",
+     sub = "a=0.09, b=0.01")
+axis(side = 1, at = seq(82, 95, by=1))#, las=2)
+abline(h = 0.92, col="red")
+legend(x = "topright", legend=c("0.92"),
+       col=c("red"), lty=1, lwd=2, cex=0.75)
+```
+
+**Threshhold value**         
+
+```{r}
+paste("P|Y=87:", p[87-81])
+paste("P|Y=88:", p[88-81])
+```
+
+### Scenario 3:                   
+- $\alpha = 0.0087, \beta = 0.0015$            
+
+**Mean and Variance of Beta(0.0087,0.0015)**        
+```{r}
+a = 8.7/1000
+b = 1.5/1000
+mean = a/(a+b)
+var = (a*b)/((a+b)^2*(a+b+1))
+paste("mean = ",mean)
+paste("variance = ", var)
+```
+
+Mean is 0.85, and variance is higher.
+
+```{r message=FALSE}
+p = rep(0, 95-81)
+
+for (i in 82:95) {
+  #a = i+1
+  data_bin = list(N = 100, y = i)
+  fit_bin = stan(file = 'beta_binom_0087_0015.stan', data = data_bin, iter = iter, seed = seed)
+  draws = as.data.frame(fit_bin)
+  p[i-81] = sum(draws$theta<=0.92)/nrow(draws)
+}
+```
+
+**Posterior plot for number of success from 82 to 95**          
+
+```{r}
+plot(82:95, p, type="o", pch="o", lty=1, col="black",
+     xlab = "Number of Success (Y)",
+     ylab = "Probability", 
+     main = "Posterior distribution of theta",
+     sub = "a=0.0087, b=0.0015")
+axis(side = 1, at = seq(82, 95, by=1))#, las=2)
+abline(h = 0.92, col="red")
+legend(x = "topright", legend=c("0.92"),
+       col=c("red"), lty=1, lwd=2, cex=0.75)
+```
+
+**Threshhold value**         
+
+```{r}
+paste("P|Y=88:", p[88-81])
+paste("P|Y=89:", p[89-81])
+```
+
+
+### Scenario 4:                   
+- $\alpha = 90, \beta = 10$            
+
+**Mean and Variance of Beta(90,10)**        
+```{r}
+a = 90
+b = 10
+mean = a/(a+b)
+var = (a*b)/((a+b)^2*(a+b+1))
+paste("mean = ",mean)
+paste("variance = ", var)
+```
+
+Mean is 0.9, and variance is way lower.
+
+```{r message=FALSE}
+p = rep(0, 95-81)
+
+for (i in 82:95) {
+  #a = i+1
+  data_bin = list(N = 100, y = i)
+  fit_bin = stan(file = 'beta_binom_90_10.stan', data = data_bin, iter = iter, seed = seed)
+  draws = as.data.frame(fit_bin)
+  p[i-81] = sum(draws$theta<=0.92)/nrow(draws)
+}
+```
+
+**Posterior plot for number of success from 82 to 95**          
+
+```{r}
+plot(82:95, p, type="o", pch="o", lty=1, col="black",
+     xlab = "Number of Success (Y)",
+     ylab = "Probability", 
+     main = "Posterior distribution of theta",
+     sub = "a=90, b=10")
+axis(side = 1, at = seq(82, 95, by=1))#, las=2)
+abline(h = 0.92, col="red")
+legend(x = "topright", legend=c("0.92"),
+       col=c("red"), lty=1, lwd=2, cex=0.75)
+```
+
+**Threshhold value**         
+
+```{r}
+paste("P|Y=88:", p[88-81])
+paste("P|Y=89:", p[89-81])
+```
+
+
+
+
+

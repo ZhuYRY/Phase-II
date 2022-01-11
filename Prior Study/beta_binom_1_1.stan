@@ -25,7 +25,7 @@ parameters {
 // 'y' to be normally distributed with mean 'mu'
 // and standard deviation 'sigma'.
 model {
-  theta ~ beta(0.09, 0.01);          // prior
+  theta ~ beta(1, 1);          // prior
   y ~ binomial(N, theta);      // observation model / likelihood
 }
 

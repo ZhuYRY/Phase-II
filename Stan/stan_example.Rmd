@@ -117,8 +117,9 @@ sum(draws_h$theta<=0.92)/nrow(draws_h)
 ### Iteration from Y = 82 to Y = 95       
 
 ```{r}
-#, include=FALSE}
-p = rep(0, 95-81)
+
+p_92 = rep(0, 95-81)
+
 for (i in 82:95) {
   #a = i+1
   data_bin = list(N = 100, y = i)
@@ -145,5 +146,5 @@ paste("P|Y=88:", p[88-81])
 paste("P|Y=89:", p[89-81])
 ```
 
-
+### 
 
