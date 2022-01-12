@@ -146,5 +146,54 @@ paste("P|Y=88:", p[88-81])
 paste("P|Y=89:", p[89-81])
 ```
 
-### 
+### j
+
+```{r}
+a = 1
+b = 1
+mean = a/(a+b)
+var = (a*b)/((a+b)^2*(a+b+1))
+paste("mean = ",mean)
+paste("variance = ", var)
+```
+
+mean = 0.9, roughly same variance as Beta(1,1)
+
+```{r}
+a = 0.090
+b = 0.010
+mean = a/(a+b)
+var = (a*b)/((a+b)^2*(a+b+1))
+paste("mean = ",mean)
+paste("variance = ", var)
+```
+
+```{r}
+
+p = rep(0, 95-81)
+iter = 1000
+for (i in 82:95) {
+  #a = i+1
+  data_bin = list(N = 100, y = i)
+  fit_bin = stan(file = 'beta_binom.stan', data = data_bin, iter = iter, seed = seed)
+  draws = as.data.frame(fit_bin)
+  p[i-81] = sum(draws$theta<=0.92)/nrow(draws)
+}
+```
+
+```{r}
+plot(82:95, p, type="o", pch="o", lty=1, col="black",
+     xlab = "Number of Success (Y)",
+     ylab = "Probability", 
+     main = "Posterior distribution of theta")
+axis(side = 1, at = seq(82, 95, by=1))#, las=2)
+abline(h = 0.92, col="red")
+legend(x = "topright", legend=c("0.92"),
+       col=c("red"), lty=1, lwd=2, cex=0.75)
+```
+
+```{r}
+paste("P|Y=88:", p[88-81])
+paste("P|Y=87:", p[87-81])
+```
 
