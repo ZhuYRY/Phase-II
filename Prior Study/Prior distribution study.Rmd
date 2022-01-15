@@ -31,12 +31,13 @@ iter = 1000
 ## Parameters      
       
 Prior distribution $\theta$~$Beta(\alpha,\beta)$, Y~$Bin(100,\theta)$;         
-Observed data is 82 responses in the first cohort of 100 patients;       
+    
 
 ### Scenario 1:                 
 $\alpha = 1, \beta = 1$            
 
-- Mean and Variance of Beta(1,1)         
+- Mean and Variance of Beta(1,1)           
+
 ```{r}
 a = 1
 b = 1
@@ -61,6 +62,17 @@ for (i in 82:95) {
 - Posterior plot for number of success from 82 to 95          
 
 ```{r}
+par(mfrow = c(2, 2))
+## Plot 1
+x_beta <- seq(0, 1, by = 0.025 )  
+y_beta <- dbeta(x_beta, shape1 = 1, shape2 = 1)  
+# Plot beta values
+plot(x_beta, y_beta, type="o", pch="o", lty=1, col="black",
+     xlab = "X",
+     ylab = "Probability", 
+     main = "Pdf of Beta(1,1)")
+##################################
+## Plot 2
 plot(82:95, p, type="o", pch="o", lty=1, col="black",
      xlab = "Number of Success (Y)",
      ylab = "Probability", 
@@ -81,20 +93,20 @@ paste("P|Y=89:", p[89-81])
 
 ### Scenario 2:                   
 
-$\alpha = 0.09, \beta = 0.01$            
+$\alpha = 0.9, \beta = 0.1$            
 
-- Mean and Variance of Beta(0.09,0.01)
+- Mean and Variance of Beta(0.9,0.1)
 
 ```{r}
-a = 0.09
-b = 0.01
+a = 0.9
+b = 0.1
 mean = a/(a+b)
 var = (a*b)/((a+b)^2*(a+b+1))
 paste("mean = ",mean)
 paste("variance = ", var)
 ```
 
-Mean is 0.9, and variance is roughly the same as Beta(1,1)
+Mean is 0.9, and variance is relatively high.
 
 ```{r message=FALSE}
 p = rep(0, 95-81)
@@ -102,7 +114,7 @@ p = rep(0, 95-81)
 for (i in 82:95) {
   #a = i+1
   data_bin = list(N = 100, y = i)
-  fit_bin = stan(file = 'beta_binom_0.09_0.01.stan', data = data_bin, iter = iter, seed = seed)
+  fit_bin = stan(file = 'beta_binom_0.9_0.1.stan', data = data_bin, iter = iter, seed = seed)
   draws = as.data.frame(fit_bin)
   p[i-81] = sum(draws$theta<=0.92)/nrow(draws)
 }
@@ -111,11 +123,22 @@ for (i in 82:95) {
 - Posterior plot for number of success from 82 to 95            
 
 ```{r}
+par(mfrow = c(2, 2))
+## Plot 1
+x_beta <- seq(0, 1, by = 0.025 )  
+y_beta <- dbeta(x_beta, shape1 = 0.9, shape2 = 0.1)  
+# Plot beta values
+plot(x_beta, y_beta, type="o", pch="o", lty=1, col="black",
+     xlab = "X",
+     ylab = "Probability", 
+     main = "Pdf of Beta(0.9,0.1)")
+##################################
+## Plot 2
 plot(82:95, p, type="o", pch="o", lty=1, col="black",
      xlab = "Number of Success (Y)",
      ylab = "Probability", 
      main = "Posterior distribution of theta",
-     sub = "a=0.09, b=0.01")
+     sub = "a=0.9, b=0.1")
 axis(side = 1, at = seq(82, 95, by=1))#, las=2)
 abline(h = 0.92, col="red")
 legend(x = "topright", legend=c("0.92"),
@@ -130,19 +153,19 @@ paste("P|Y=88:", p[88-81])
 ```
 
 ### Scenario 3:                   
-$\alpha = 0.0087, \beta = 0.0015$            
+$\alpha = 9, \beta = 1$            
 
-- Mean and Variance of Beta(0.0087,0.0015)        
+- Mean and Variance of Beta(9,1)        
 ```{r}
-a = 8.7/1000
-b = 1.5/1000
+a = 9
+b = 1
 mean = a/(a+b)
 var = (a*b)/((a+b)^2*(a+b+1))
 paste("mean = ",mean)
 paste("variance = ", var)
 ```
 
-Mean is 0.85, and variance is higher.
+Mean is 0.9, and variance is relatively medium.
 
 ```{r message=FALSE}
 p = rep(0, 95-81)
@@ -150,7 +173,7 @@ p = rep(0, 95-81)
 for (i in 82:95) {
   #a = i+1
   data_bin = list(N = 100, y = i)
-  fit_bin = stan(file = 'beta_binom_0087_0015.stan', data = data_bin, iter = iter, seed = seed)
+  fit_bin = stan(file = 'beta_binom_9_1.stan', data = data_bin, iter = iter, seed = seed)
   draws = as.data.frame(fit_bin)
   p[i-81] = sum(draws$theta<=0.92)/nrow(draws)
 }
@@ -159,11 +182,21 @@ for (i in 82:95) {
 - Posterior plot for number of success from 82 to 95          
 
 ```{r}
+par(mfrow = c(2, 2))
+## Plot 1
+x_beta <- seq(0, 1, by = 0.025 )  
+y_beta <- dbeta(x_beta, shape1 = 9, shape2 = 1)  
+# Plot beta values
+plot(x_beta, y_beta, type="o", pch="o", lty=1, col="black",
+     xlab = "X",
+     ylab = "Probability", 
+     main = "Pdf of Beta(9,1)")
+##################################
 plot(82:95, p, type="o", pch="o", lty=1, col="black",
      xlab = "Number of Success (Y)",
      ylab = "Probability", 
      main = "Posterior distribution of theta",
-     sub = "a=0.0087, b=0.0015")
+     sub = "a=9, b=1")
 axis(side = 1, at = seq(82, 95, by=1))#, las=2)
 abline(h = 0.92, col="red")
 legend(x = "topright", legend=c("0.92"),
@@ -173,8 +206,8 @@ legend(x = "topright", legend=c("0.92"),
 - Threshhold value         
 
 ```{r}
+paste("P|Y=87:", p[87-81])
 paste("P|Y=88:", p[88-81])
-paste("P|Y=89:", p[89-81])
 ```
 
 
@@ -208,6 +241,16 @@ for (i in 82:95) {
 - Posterior plot for number of success from 82 to 95          
 
 ```{r}
+par(mfrow = c(2, 2))
+## Plot 1
+x_beta <- seq(0, 1, by = 0.025 )  
+y_beta <- dbeta(x_beta, shape1 = 90, shape2 = 10)  
+# Plot beta values
+plot(x_beta, y_beta, type="o", pch="o", lty=1, col="black",
+     xlab = "X",
+     ylab = "Probability", 
+     main = "Pdf of Beta(90,10)")
+##################################
 plot(82:95, p, type="o", pch="o", lty=1, col="black",
      xlab = "Number of Success (Y)",
      ylab = "Probability", 
